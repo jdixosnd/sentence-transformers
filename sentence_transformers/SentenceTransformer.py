@@ -688,6 +688,7 @@ class SentenceTransformer(nn.Sequential):
         skip_scheduler = False
         for epoch in trange(epochs, desc="Epoch", disable=not show_progress_bar):
             training_steps = 0
+            train_loss = 0
 
             for loss_model in loss_models:
                 loss_model.zero_grad()
@@ -736,9 +737,13 @@ class SentenceTransformer(nn.Sequential):
 
                     if log_steps > 0 and training_steps % log_steps == (log_steps - 1) and log_callback is not None:
                         try:
-                            log_callback(train_idx, epoch, training_steps, scheduler.get_last_lr(), loss_value.item())
+                            with torch.no_grad():
+                                train_loss= (train_loss+loss_value.item())/(training_steps+1)
+                                log_callback(train_idx, epoch, training_steps, scheduler.get_last_lr(), train_loss) #loss_value.item()
+                                
                         except Exception as e:
                             logger.warning(e)
+                            
                             logger.warning("Logging error encountered. Ignoring..")
 
                 training_steps += 1
