@@ -738,6 +738,7 @@ class SentenceTransformer(nn.Sequential):
                         try:
                             log_callback(train_idx, epoch, training_steps, scheduler.get_last_lr(), loss_value.item())
                         except Exception as e:
+                            logger.warning(e)
                             logger.warning("Logging error encountered. Ignoring..")
 
                 training_steps += 1
